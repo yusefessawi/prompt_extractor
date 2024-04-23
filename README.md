@@ -3,7 +3,7 @@
 #### Yusef Essawi
 _____________________
 
-**Prompt Engineering**: Crafting high-quality prompts that can guide a large language model (LLM) toward generating precise and meaningful responses
+**Prompt Engineering**: Crafting prompts that can guide a large language model (LLM) toward generating precise and meaningful responses
 
 **Why prompt theft matters:**
 - A good prompt is valuable because it is effective at performing particular tasks, contains sensitive information, or both.
