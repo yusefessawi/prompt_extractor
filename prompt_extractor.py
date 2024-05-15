@@ -28,46 +28,6 @@ def get_AI_response(AI_model, prompt):
     return response
 
 
-def get_synonyms(word):
-    synonyms = set()
-    for synset in wn.synsets(word):
-        for lemma in synset.lemmas():
-            synonyms.add(lemma.name())
-    return list(synonyms)
-
-
-def get_cosine_similarity(string1, string2):
-    '''Calculates cosine similarity (with synonyms)'''
-    # Tokenize strings into words
-    words1 = string1.split()
-    words2 = string2.split()
-
-    # Collect all unique words from both strings
-    unique_words = set(words1 + words2)
-
-    # Construct sentences with synonyms
-    sentences = []
-    for word in unique_words:
-        synonyms = get_synonyms(word)
-        for synonym in synonyms:
-            sentence1 = ' '.join([synonym if w == word else w for w in words1])
-            sentence2 = ' '.join([synonym if w == word else w for w in words2])
-            sentences.append(sentence1)
-            sentences.append(sentence2)
-
-    # Compute TF-IDF vectors
-    tfidf_vectorizer = TfidfVectorizer()
-    tfidf_matrix = tfidf_vectorizer.fit_transform(sentences)
-
-    # Compute cosine similarity between TF-IDF vectors
-    similarity = cosine_similarity(tfidf_matrix[0::2], tfidf_matrix[1::2])
-
-    # Get maximum similarity score
-    max_similarity = similarity.max()
-
-    return max_similarity
-
-
 def main():
     parser = argparse.ArgumentParser(description= "Specify a LLM-generated response or file and (optionally) the model that generated it")
     parser.add_argument('response', type = str, help="LLM-generated response")
@@ -75,7 +35,6 @@ def main():
 
     load_dotenv()
     chat = ChatOpenAI(model="gpt-3.5-turbo-1106", temperature=0.2)
-    print(get_AI_response(chat, "explain the difference between code and psuedocode in simple terms"))
 
     # Load the classifier model
     with open('svc_role_classifier.pkl', 'rb') as f:
@@ -86,8 +45,12 @@ def main():
         vectorizer = pickle.load(f)
 
     predicted_role = svc_classifier.predict(vectorizer.transform([args.response]))
+    query = f"What question are you asked if you can generate the following answer: {args.response}"
     
-
+    if predicted_role != ['none']:
+        print(f"you are a {predicted_role}" + get_AI_response(chat, query))
+    else:
+        print(get_AI_response(chat, query))
     
 
 main()
